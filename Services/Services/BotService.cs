@@ -11,18 +11,39 @@ namespace Services.Services
         {
             this.stooqRepository = stooqRepository;
         }
-        public async Task GetStockQuote(BotQuery query)
+        public async Task<string> GetStockQuote(BotQuery query)
         {
             try
             {
-                 await stooqRepository.getStockQuote(query.MessageContent);
+                 ValidateBotQuery(query.MessageContent);
+                 return await stooqRepository.getStockQuote(cleanBotQuery(query.MessageContent));
             }
             catch (Exception ex)
             {
                 throw;
             }
         }
-     
+
+        private string cleanBotQuery(string messageContent)
+        {
+            string[] splits = messageContent.Split(' ');
+
+            if (splits[0] == "/stock")
+            {
+                return splits[1];
+            } else
+            {
+                throw new InvalidDataException("stock quote cannot be found, sorry");
+
+            }
+
+        }
+
+        private void ValidateBotQuery(string messageContent)
+        {
+
+            if (string.IsNullOrWhiteSpace(messageContent)) throw new InvalidDataException("stock quote cannot be found, sorry");
+        }
     }
         
 }

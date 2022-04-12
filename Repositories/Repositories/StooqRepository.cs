@@ -15,18 +15,15 @@ namespace Repositories.Repositories
         private readonly string URL_INIT = "https://stooq.com/q/l/?s=";
         private string URL_PARAM = "aapl.us";
         private readonly string URL_DEFAULT_PARAM = "&f=sd2t2ohlcv&h&e=csv";
-        public async Task getStockQuote(string messageContent)
+        public async Task<string> getStockQuote(string messageContent)
         {
     
             try
             {
-                if (messageContent != null)
-                {
-                    var json = JsonConvert.SerializeObject(messageContent);
-                    var data = new StringContent(json, Encoding.UTF8, "application/json");
-                    using var client = new HttpClient();
-                    var response =  await client.GetAsync(URL_INIT);
-                }
+                using var client = new HttpClient();
+                var response = await client.GetAsync(URL_INIT + messageContent + URL_DEFAULT_PARAM);
+                var stooqQuote = await response.Content.ReadAsStringAsync();
+                return stooqQuote;
             }
             catch (Exception)
             {

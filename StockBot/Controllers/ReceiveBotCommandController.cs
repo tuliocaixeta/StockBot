@@ -22,18 +22,17 @@ namespace StockBot.Controllers
         }
 
         [HttpPost(Name = "PostBotQuery")]
-        public void ReceiveBotCommand(BotQuery query )
+        public async Task ReceiveBotCommand(BotQuery query )
         {
 
-             _botService.GetStockQuote(query);
+            var stockQuote = await _botService.GetStockQuote(query);
             using (var connection = _connectionFac.CreateConnection())
             {
                 using (var channel = connection.CreateModel())
                 {
                     channel.QueueDeclare(queue: QUEUE_INFO,false, false, false, null);
 
-                    var messageInString = JsonConvert.SerializeObject(query.MessageContent);
-                    var body = Encoding.UTF8.GetBytes(messageInString);
+                    var body = Encoding.UTF8.GetBytes(stockQuote);
 
                     channel.BasicPublish(exchange: "",
                         routingKey: QUEUE_INFO,
